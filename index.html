@@ -1,0 +1,1966 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Word Puzzle Adventure</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='75' font-size='75'>🌍</text></svg>">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #FF6B6B;
+            --secondary: #4ECDC4;
+            --accent: #FFE66D;
+            --success: #95E1D3;
+            --danger: #FF6B6B;
+            --dark: #2C3E50;
+            --light: #ECF0F1;
+            --glow: 0 0 20px rgba(76, 205, 196, 0.6);
+            --shake: 5px;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            overflow-x: hidden;
+        }
+
+        body.theme-ocean {
+            background: linear-gradient(135deg, #1a472a 0%, #2d5a4e 50%, #1e3c3a 100%);
+        }
+
+        body.theme-desert {
+            background: linear-gradient(135deg, #d4a574 0%, #f4d9c5 50%, #e8c4a0 100%);
+        }
+
+        .game-container {
+            width: 100%;
+            max-width: 600px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid var(--secondary);
+        }
+
+        .logo {
+            font-size: 36px;
+            font-weight: bold;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .stat-box {
+            background: linear-gradient(135deg, var(--light), white);
+            padding: 12px;
+            border-radius: 15px;
+            text-align: center;
+            border: 2px solid var(--secondary);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: #999;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary);
+            margin-top: 5px;
+        }
+
+        .level-display {
+            font-size: 14px;
+            color: var(--secondary);
+            font-weight: bold;
+        }
+
+        .content-area {
+            min-height: 300px;
+            margin-bottom: 20px;
+        }
+
+        .menu-screen {
+            text-align: center;
+        }
+
+        .menu-screen h2 {
+            font-size: 32px;
+            margin-bottom: 30px;
+            color: var(--dark);
+        }
+
+        .menu-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 20px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), #ff5252);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, var(--secondary), #2ba89f);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            box-shadow: 0 6px 20px rgba(78, 205, 196, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .btn-accent {
+            background: linear-gradient(135deg, var(--accent), #ffd700);
+            color: #333;
+        }
+
+        .btn-accent:hover {
+            box-shadow: 0 6px 20px rgba(255, 230, 109, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 12px;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .game-screen {
+            display: none;
+        }
+
+        .game-screen.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .level-title {
+            text-align: center;
+            margin-bottom: 20px;
+            color: var(--dark);
+        }
+
+        .level-title h3 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .level-description {
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        .level-description strong {
+            color: var(--secondary);
+        }
+
+        .timer-bar {
+            height: 8px;
+            background: #ddd;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .timer-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--success), var(--accent), var(--danger));
+            transition: width 0.1s linear;
+            width: 100%;
+        }
+
+        .timer-fill.warning {
+            animation: pulse 0.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .timer-text {
+            text-align: center;
+            font-size: 12px;
+            color: var(--dark);
+            margin-top: 5px;
+            font-weight: bold;
+        }
+
+        .puzzle-area {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 20px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            min-height: 120px;
+            border: 3px dashed var(--secondary);
+        }
+
+        .word-display {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .slot {
+            width: 50px;
+            height: 50px;
+            background: white;
+            border: 3px solid var(--secondary);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--dark);
+            cursor: default;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .slot.active {
+            border: 4px solid var(--primary);
+            background: linear-gradient(135deg, #ffe66d66, #fff);
+            box-shadow: var(--glow);
+            animation: pulse-slot 0.6s ease;
+        }
+
+        @keyframes pulse-slot {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .slot.filled {
+            border-color: var(--success);
+            background: linear-gradient(135deg, var(--success), white);
+        }
+
+        .slot.locked {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .slot.error {
+            animation: shake 0.4s ease;
+            border-color: var(--danger);
+            background: #ffebee;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-var(--shake)); }
+            75% { transform: translateX(var(--shake)); }
+        }
+
+        .slot.correct {
+            animation: correctBounce 0.5s ease;
+        }
+
+        @keyframes correctBounce {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .slot-feedback {
+            position: absolute;
+            font-size: 20px;
+            animation: feedbackFloat 0.8s ease forwards;
+        }
+
+        @keyframes feedbackFloat {
+            0% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-30px) scale(0.5);
+            }
+        }
+
+        .letters-available {
+            background: white;
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            border: 2px solid #ddd;
+        }
+
+        .letters-label {
+            font-size: 12px;
+            font-weight: bold;
+            color: #999;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .letter-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .letter-btn {
+            width: 40px;
+            height: 40px;
+            border: 2px solid var(--secondary);
+            border-radius: 10px;
+            background: white;
+            color: var(--dark);
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .letter-btn:hover:not(:disabled) {
+            background: var(--secondary);
+            color: white;
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(78, 205, 196, 0.3);
+        }
+
+        .letter-btn:active:not(:disabled) {
+            transform: scale(0.95);
+        }
+
+        .letter-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            color: #ccc;
+            border-color: #ccc;
+        }
+
+        .letter-btn.wrong {
+            background: #ffebee;
+            border-color: var(--danger);
+            animation: shake 0.3s ease;
+        }
+
+        .hint-area {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+            justify-content: center;
+        }
+
+        .hint-btn {
+            padding: 8px 12px;
+            background: var(--accent);
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            color: #333;
+        }
+
+        .hint-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 230, 109, 0.3);
+        }
+
+        .hint-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .hint-display {
+            text-align: center;
+            font-size: 14px;
+            color: var(--dark);
+            padding: 10px;
+            background: #fffbea;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            min-height: 30px;
+            border-left: 4px solid var(--accent);
+        }
+
+        .combo-bar {
+            background: white;
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            border: 2px solid var(--secondary);
+        }
+
+        .combo-text {
+            font-size: 12px;
+            font-weight: bold;
+            color: var(--secondary);
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .combo-meter {
+            height: 12px;
+            background: #ddd;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .combo-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--secondary), var(--accent));
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        .combo-milestone {
+            position: absolute;
+            height: 100%;
+            width: 2px;
+            background: rgba(255, 255, 255, 0.7);
+            top: 0;
+        }
+
+        .emotion-box {
+            text-align: center;
+            font-size: 14px;
+            color: var(--dark);
+            margin-bottom: 15px;
+            min-height: 30px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .emotion-emoji {
+            font-size: 32px;
+            margin-right: 8px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-hint {
+            background: var(--accent);
+            color: #333;
+        }
+
+        .btn-hint:hover:not(:disabled) {
+            box-shadow: 0 6px 20px rgba(255, 230, 109, 0.4);
+        }
+
+        .btn-skip {
+            background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+            color: white;
+        }
+
+        .btn-skip:hover:not(:disabled) {
+            box-shadow: 0 6px 20px rgba(149, 165, 166, 0.4);
+        }
+
+        .completion-screen {
+            text-align: center;
+        }
+
+        .completion-screen h2 {
+            font-size: 32px;
+            color: var(--dark);
+            margin-bottom: 20px;
+        }
+
+        .stars {
+            font-size: 48px;
+            margin-bottom: 20px;
+            animation: starBurst 0.6s ease;
+        }
+
+        @keyframes starBurst {
+            0% {
+                transform: scale(0) rotate(0deg);
+            }
+            100% {
+                transform: scale(1) rotate(360deg);
+            }
+        }
+
+        .score-display {
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .score-breakdown {
+            background: var(--light);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .breakdown-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .breakdown-item strong {
+            color: var(--dark);
+        }
+
+        .mode-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .mode-card {
+            padding: 15px;
+            border-radius: 12px;
+            border: 2px solid #ddd;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .mode-card:hover {
+            border-color: var(--secondary);
+            box-shadow: 0 4px 12px rgba(78, 205, 196, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .mode-card.selected {
+            background: linear-gradient(135deg, var(--secondary), #2ba89f);
+            color: white;
+            border-color: var(--secondary);
+        }
+
+        .mode-emoji {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .mode-name {
+            font-weight: bold;
+            font-size: 13px;
+        }
+
+        .mode-desc {
+            font-size: 10px;
+            opacity: 0.7;
+            margin-top: 5px;
+        }
+
+        .boss-hp {
+            background: white;
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            border: 2px solid var(--danger);
+        }
+
+        .boss-title {
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+            color: var(--danger);
+            margin-bottom: 10px;
+        }
+
+        .hp-bar {
+            height: 20px;
+            background: #ddd;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .hp-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--danger), #ff8a80);
+            transition: width 0.3s ease;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            color: white;
+            font-weight: bold;
+        }
+
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        .level-select {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .level-btn {
+            padding: 12px;
+            border: 2px solid var(--secondary);
+            border-radius: 10px;
+            background: white;
+            color: var(--dark);
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            font-size: 12px;
+        }
+
+        .level-btn:hover:not(:disabled) {
+            background: var(--secondary);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .level-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            color: #999;
+        }
+
+        .level-btn.completed {
+            background: linear-gradient(135deg, var(--success), #5ed4a7);
+            color: white;
+            border-color: var(--success);
+        }
+
+        .tutorial {
+            background: #fffbea;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            border-left: 4px solid var(--accent);
+        }
+
+        .tutorial-title {
+            font-weight: bold;
+            color: var(--dark);
+            margin-bottom: 8px;
+        }
+
+        .tutorial-text {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        .accessibility-controls {
+            padding: 10px;
+            border-radius: 10px;
+            background: var(--light);
+            margin-bottom: 15px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .a11y-btn {
+            padding: 6px 10px;
+            border: none;
+            border-radius: 6px;
+            background: white;
+            color: var(--dark);
+            cursor: pointer;
+            font-size: 11px;
+            border: 1px solid #ccc;
+            transition: all 0.2s ease;
+        }
+
+        .a11y-btn:hover {
+            background: var(--secondary);
+            color: white;
+            border-color: var(--secondary);
+        }
+
+        .a11y-btn.active {
+            background: var(--secondary);
+            color: white;
+            border-color: var(--secondary);
+        }
+
+        /* High Contrast Mode */
+        body.high-contrast {
+            --primary: #000;
+            --secondary: #000;
+            --accent: #000;
+            --success: #000;
+            --danger: #000;
+            --dark: #000;
+        }
+
+        body.high-contrast .slot {
+            border: 4px solid #000;
+            background: white;
+        }
+
+        body.high-contrast .btn {
+            border: 3px solid #000;
+            background: white;
+            color: #000;
+        }
+
+        /* Dyslexia-friendly font */
+        body.dyslexia-mode {
+            font-family: 'OpenDyslexic', 'Comic Sans MS', cursive;
+        }
+
+        @media (max-width: 480px) {
+            .game-container {
+                padding: 15px;
+                border-radius: 20px;
+            }
+
+            .slot {
+                width: 45px;
+                height: 45px;
+                font-size: 20px;
+            }
+
+            .logo {
+                font-size: 28px;
+            }
+
+            .level-title h3 {
+                font-size: 20px;
+            }
+
+            .mode-selector {
+                grid-template-columns: 1fr;
+            }
+
+            .level-select {
+                grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
+            }
+
+            .btn {
+                padding: 12px 20px;
+                font-size: 14px;
+            }
+        }
+
+        @media (max-width: 320px) {
+            .game-container {
+                padding: 10px;
+            }
+
+            .slot {
+                width: 40px;
+                height: 40px;
+                font-size: 18px;
+            }
+
+            .logo {
+                font-size: 24px;
+            }
+        }
+
+        /* Additional animations */
+        @keyframes glow {
+            0%, 100% {
+                box-shadow: 0 0 5px rgba(76, 205, 196, 0.3);
+            }
+            50% {
+                box-shadow: var(--glow);
+            }
+        }
+
+        .glowing {
+            animation: glow 1.5s ease infinite;
+        }
+
+        #wordIconDisplay {
+            text-align: center;
+            font-size: 52px;
+            color: var(--dark);
+            margin-top: 10px;
+            margin-bottom: 15px;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: slideDown 0.3s ease;
+        }
+
+        @media (max-width: 480px) {
+            #wordIconDisplay {
+                font-size: 44px;
+                min-height: 50px;
+            }
+        }
+
+        @media (max-width: 320px) {
+            #wordIconDisplay {
+                font-size: 38px;
+                min-height: 45px;
+            }
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .floating {
+            animation: float 2s ease-in-out infinite;
+        }
+
+        .slide-down {
+            animation: slideDown 0.3s ease forwards;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            z-index: 10000;
+            text-align: center;
+            max-width: 90%;
+            animation: popupAppear 0.3s ease;
+        }
+
+        @keyframes popupAppear {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 9999;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="header">
+            <div class="logo">🌍 Word Quest</div>
+            <div class="subtitle">Global Adventure</div>
+        </div>
+
+        <div class="stats">
+            <div class="stat-box">
+                <div class="stat-label">Score</div>
+                <div class="stat-value" id="score">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Level</div>
+                <div class="stat-value level-display" id="level">1</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Stars</div>
+                <div class="stat-value" id="stars">⭐0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Coins</div>
+                <div class="stat-value" id="coins">💰0</div>
+            </div>
+        </div>
+
+        <div class="accessibility-controls">
+            <button class="a11y-btn" id="voiceBtn" title="Toggle Voice Hints">🔊 Voice</button>
+            <button class="a11y-btn" id="wordIconBtn" title="Toggle Word Icons">🎨 Icons</button>
+            <button class="a11y-btn" id="highContrastBtn" title="High Contrast Mode">⚫ Contrast</button>
+            <button class="a11y-btn" id="dyslexiaBtn" title="Dyslexia-friendly Font">📖 Font</button>
+            <button class="a11y-btn" id="largeTextBtn" title="Larger Text">🔤 Text+</button>
+        </div>
+
+        <div class="content-area">
+            <!-- Menu Screen -->
+            <div class="menu-screen" id="menuScreen">
+                <h2>🌍 Word Quest</h2>
+                <div class="menu-buttons">
+                    <button class="btn btn-primary" onclick="game.startGame('story')">📖 Story Mode</button>
+                    <button class="btn btn-secondary" onclick="game.startGame('practice')">🎯 Practice Mode</button>
+                    <button class="btn btn-accent" onclick="game.startGame('timeattack')">⏱️ Time Attack</button>
+                    <button class="btn btn-secondary" onclick="game.showLevelSelect()">📚 Level Select</button>
+                    <button class="btn btn-secondary btn-small" onclick="game.resetProgress()">🔄 Reset Progress</button>
+                </div>
+            </div>
+
+            <!-- Game Screen -->
+            <div class="game-screen" id="gameScreen">
+                <div class="level-title">
+                    <h3 id="levelName">Level 1</h3>
+                    <div id="wordIconDisplay"></div>
+                    <div class="level-description">
+                        <strong id="levelCategory">Warm-Up</strong> • <span id="levelRules">Free placement</span>
+                    </div>
+                </div>
+
+                <div class="emotion-box" id="emotionBox"></div>
+
+                <div class="timer-bar" id="timerBar">
+                    <div class="timer-fill" id="timerFill"></div>
+                </div>
+                <div class="timer-text">
+                    Time: <span id="timeRemaining">30</span>s | Errors: <span id="errorCount">0</span>/<span id="errorLimit">10</span>
+                </div>
+
+                <div class="boss-hp" id="bossHp" style="display: none;">
+                    <div class="boss-title" id="bossName">Boss</div>
+                    <div class="hp-bar">
+                        <div class="hp-fill" id="hpFill" style="width: 100%;">
+                            <span id="hpText">100</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="combo-bar" id="comboBar" style="display: none;">
+                    <div class="combo-text">🔥 Combo: <span id="comboCount">0</span>/3</div>
+                    <div class="combo-meter">
+                        <div class="combo-fill" id="comboFill" style="width: 0%;"></div>
+                    </div>
+                </div>
+
+                <div class="tutorial" id="tutorial" style="display: none;">
+                    <div class="tutorial-title" id="tutorialTitle">💡 How to Play</div>
+                    <div class="tutorial-text" id="tutorialText">Fill the slots by dragging or clicking letters.</div>
+                </div>
+
+                <div class="hint-display" id="hintDisplay" style="display: none;"></div>
+
+                <div class="puzzle-area">
+                    <div class="word-display" id="wordDisplay"></div>
+                </div>
+
+                <div class="letters-available">
+                    <div class="letters-label">Available Letters</div>
+                    <div class="letter-buttons" id="letterButtons"></div>
+                </div>
+
+                <div class="hint-area" id="hintArea"></div>
+
+                <div class="controls">
+                    <button class="btn btn-hint btn-small" id="hintBtn" onclick="game.useHint()">💡 Hint</button>
+                    <button class="btn btn-skip btn-small" id="skipBtn" onclick="game.skipLevel()">⏭️ Skip</button>
+                </div>
+            </div>
+
+            <!-- Completion Screen -->
+            <div class="game-screen" id="completionScreen">
+                <div class="completion-screen">
+                    <h2>🎉 Level Complete!</h2>
+                    <div class="stars" id="starsDisplay">⭐⭐⭐</div>
+                    <div class="score-display" id="levelScore">500</div>
+                    <div class="score-breakdown">
+                        <div class="breakdown-item">
+                            <strong>Base Score:</strong>
+                            <span id="baseScore">300</span>
+                        </div>
+                        <div class="breakdown-item">
+                            <strong>Time Bonus:</strong>
+                            <span id="timeBonus">100</span>
+                        </div>
+                        <div class="breakdown-item">
+                            <strong>Combo Bonus:</strong>
+                            <span id="comboBonus">100</span>
+                        </div>
+                        <div class="breakdown-item">
+                            <strong>Error Penalty:</strong>
+                            <span id="errorPenalty">-50</span>
+                        </div>
+                    </div>
+                    <div class="menu-buttons">
+                        <button class="btn btn-primary" id="nextBtn" onclick="game.nextLevel()">➡️ Next Level</button>
+                        <button class="btn btn-secondary" onclick="game.showMenu()">🏠 Main Menu</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Level Select Screen -->
+            <div class="game-screen" id="levelSelectScreen">
+                <h3 style="text-align: center; margin-bottom: 20px; color: var(--dark);">Select Level</h3>
+                <div class="level-select" id="levelSelectButtons"></div>
+                <div class="menu-buttons">
+                    <button class="btn btn-secondary" onclick="game.showMenu()">🏠 Back to Menu</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================
+        // GAME STATE & MANAGERS
+        // ============================================================
+
+        class GameState {
+            constructor() {
+                this.currentLevel = 1;
+                this.score = 0;
+                this.totalStars = 0;
+                this.totalCoins = 0;
+                this.completedLevels = new Set();
+                this.gameMode = 'story';
+                this.load();
+            }
+
+            save() {
+                const data = {
+                    currentLevel: this.currentLevel,
+                    score: this.score,
+                    totalStars: this.totalStars,
+                    totalCoins: this.totalCoins,
+                    completedLevels: Array.from(this.completedLevels),
+                    gameMode: this.gameMode
+                };
+                localStorage.setItem('gameState', JSON.stringify(data));
+            }
+
+            load() {
+                const data = localStorage.getItem('gameState');
+                if (data) {
+                    const parsed = JSON.parse(data);
+                    this.currentLevel = parsed.currentLevel || 1;
+                    this.score = parsed.score || 0;
+                    this.totalStars = parsed.totalStars || 0;
+                    this.totalCoins = parsed.totalCoins || 0;
+                    this.completedLevels = new Set(parsed.completedLevels || []);
+                    this.gameMode = parsed.gameMode || 'story';
+                }
+            }
+
+            reset() {
+                this.currentLevel = 1;
+                this.score = 0;
+                this.totalStars = 0;
+                this.totalCoins = 0;
+                this.completedLevels.clear();
+                this.save();
+            }
+        }
+
+        class SoundManager {
+            constructor() {
+                this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                this.sounds = {};
+                this.initSounds();
+                this.enabled = true;
+            }
+
+            initSounds() {
+                // Will use Web Audio API to generate sounds
+            }
+
+            playSound(name, duration = 0.1, frequency = 440) {
+                if (!this.enabled) return;
+                try {
+                    const now = this.audioContext.currentTime;
+                    const osc = this.audioContext.createOscillator();
+                    const gain = this.audioContext.createGain();
+                    
+                    osc.connect(gain);
+                    gain.connect(this.audioContext.destination);
+                    
+                    osc.frequency.setValueAtTime(frequency, now);
+                    gain.gain.setValueAtTime(0.1, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + duration);
+                    
+                    osc.start(now);
+                    osc.stop(now + duration);
+                } catch(e) {}
+            }
+
+            correct() {
+                this.playSound('correct', 0.1, 800);
+                this.playSound('correct', 0.15, 1000);
+            }
+
+            wrong() {
+                this.playSound('wrong', 0.1, 200);
+            }
+
+            click() {
+                this.playSound('click', 0.05, 600);
+            }
+
+            combo() {
+                this.playSound('combo', 0.15, 1200);
+                setTimeout(() => this.playSound('combo', 0.15, 1600), 100);
+            }
+
+            levelUp() {
+                this.playSound('levelup', 0.1, 500);
+                this.playSound('levelup', 0.1, 800);
+                this.playSound('levelup', 0.2, 1200);
+            }
+
+            warning() {
+                this.playSound('warning', 0.2, 300);
+            }
+        }
+
+        class VoiceManager {
+            constructor() {
+                this.enabled = true;
+                this.rate = 1;
+            }
+
+            speak(text) {
+                if (!this.enabled) return;
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.rate = this.rate;
+                utterance.pitch = 1.2;
+                window.speechSynthesis.cancel();
+                window.speechSynthesis.speak(utterance);
+            }
+
+            praise() {
+                const messages = [
+                    "Excellent!",
+                    "Great job!",
+                    "You're doing amazing!",
+                    "Perfect!",
+                    "Super duper!",
+                    "Fantastic work!",
+                    "You rock!"
+                ];
+                this.speak(messages[Math.floor(Math.random() * messages.length)]);
+            }
+
+            hint(text) {
+                this.speak("Hint: " + text);
+            }
+
+            warning(text) {
+                this.speak("Warning: " + text);
+            }
+        }
+
+        class LevelManager {
+            constructor() {
+                this.levels = this.defineLevels();
+            }
+
+            getLevel(number) {
+                return this.levels.find(l => l.number === number);
+            }
+
+            getEmojiForWord(word) {
+                const emojiMap = {
+                    'HELLO': '👋',
+                    'WORLD': '🌍',
+                    'GAME': '🎮',
+                    'PLAY': '🎭',
+                    'FUN': '🎉',
+                    'WORD': '📝',
+                    'PUZZLE': '🧩',
+                    'QUEST': '🗡️',
+                    'ADVENTURE': '🗺️',
+                    'GLOBAL': '🌐'
+                };
+                return emojiMap[word] || '❓';
+            }
+
+            defineLevels() {
+                const levels = [];
+                for (let i = 1; i <= 100; i++) {
+                    const group = Math.ceil(i / 10);
+                    const word = this.generateWord(i);
+                    levels.push({
+                        number: i,
+                        name: `Level ${i}`,
+                        category: `Group ${group}`,
+                        emoji: this.getEmojiForWord(word),
+                        word: word,
+                        timerSeconds: 30,
+                        errorLimit: 10,
+                        fakeLetters: 2,
+                        rules: 'Free placement',
+                        description: 'Fill the word',
+                        features: [],
+                        isBoss: false,
+                        noHints: false
+                    });
+                }
+                // Make every 10th level a boss
+                for (let i = 10; i <= 100; i += 10) {
+                    levels[i-1].isBoss = true;
+                    levels[i-1].name = `Boss Level ${i}`;
+                }
+                return levels;
+            }
+
+            generateWord(level) {
+                const words = ['HELLO', 'WORLD', 'GAME', 'PLAY', 'FUN', 'WORD', 'PUZZLE', 'QUEST', 'ADVENTURE', 'GLOBAL'];
+                return words[(level - 1) % words.length];
+            }
+        }
+
+        class UIManager {
+            constructor(game) {
+                this.game = game;
+                this.updateStats();
+            }
+
+            updateStats() {
+                document.getElementById('score').textContent = this.game.state.score;
+                document.getElementById('level').textContent = this.game.state.currentLevel;
+                document.getElementById('stars').textContent = '⭐' + this.game.state.totalStars;
+                document.getElementById('coins').textContent = '💰' + this.game.state.totalCoins;
+            }
+
+            showScreen(screenId) {
+                document.querySelectorAll('.game-screen').forEach(s => s.classList.remove('active'));
+                document.getElementById(screenId).classList.add('active');
+            }
+
+            setupLevelUI(level) {
+                document.getElementById('levelName').textContent = `Level ${level.number}: ${level.name}`;
+                document.getElementById('levelCategory').textContent = level.category;
+                document.getElementById('levelRules').textContent = level.rules;
+                
+                // Show/hide boss HP
+                if (level.isBoss) {
+                    document.getElementById('bossHp').style.display = 'block';
+                    document.getElementById('bossName').textContent = `👹 ${level.name} Boss`;
+                    document.getElementById('hpFill').style.width = '100%';
+                    document.getElementById('hpText').textContent = '100';
+                } else {
+                    document.getElementById('bossHp').style.display = 'none';
+                }
+
+                // Show tutorial for level 1
+                if (level.number === 1) {
+                    document.getElementById('tutorial').style.display = 'block';
+                    document.getElementById('tutorialText').textContent = level.description;
+                } else {
+                    document.getElementById('tutorial').style.display = 'none';
+                }
+
+                // Show combo bar for combo levels
+                if (level.features.includes('combo')) {
+                    document.getElementById('comboBar').style.display = 'block';
+                } else {
+                    document.getElementById('comboBar').style.display = 'none';
+                }
+            }
+
+            createSlots(word) {
+                const wordDisplay = document.getElementById('wordDisplay');
+                wordDisplay.innerHTML = '';
+                
+                for (let i = 0; i < word.length; i++) {
+                    const slot = document.createElement('div');
+                    slot.className = 'slot';
+                    slot.dataset.index = i;
+                    slot.dataset.correct = word[i];
+                    wordDisplay.appendChild(slot);
+                }
+            }
+
+            createLetterButtons(word) {
+                const letters = word.split('');
+                const available = [...letters];
+                const level = this.game.currentLevel;
+                
+                if (level.fakeLetters > 0) {
+                    const allLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+                    for (let i = 0; i < level.fakeLetters; i++) {
+                        let randomLetter;
+                        do {
+                            randomLetter = allLetters[Math.floor(Math.random() * allLetters.length)];
+                        } while (letters.includes(randomLetter));
+                        available.push(randomLetter);
+                    }
+                }
+
+                // Shuffle
+                available.sort(() => Math.random() - 0.5);
+
+                const container = document.getElementById('letterButtons');
+                container.innerHTML = '';
+                
+                available.forEach(letter => {
+                    const btn = document.createElement('button');
+                    btn.className = 'letter-btn';
+                    btn.textContent = letter;
+                    btn.dataset.letter = letter;
+                    btn.onclick = () => this.game.selectLetter(letter);
+                    container.appendChild(btn);
+                });
+            }
+
+            setActiveSlot(index) {
+                document.querySelectorAll('.slot').forEach((slot, i) => {
+                    slot.classList.toggle('active', i === index && slot.textContent === '');
+                });
+            }
+
+            updateTimer(remaining, total) {
+                const percent = (remaining / total) * 100;
+                document.getElementById('timerFill').style.width = percent + '%';
+                document.getElementById('timeRemaining').textContent = Math.ceil(remaining);
+                
+                if (remaining < 10) {
+                    document.getElementById('timerFill').classList.add('warning');
+                    if (remaining <= 3) {
+                        this.game.soundManager.warning();
+                    }
+                } else {
+                    document.getElementById('timerFill').classList.remove('warning');
+                }
+            }
+
+            updateErrorCount(current, limit) {
+                document.getElementById('errorCount').textContent = current;
+                document.getElementById('errorLimit').textContent = limit;
+            }
+
+            updateCombo(current) {
+                const fill = Math.min((current / 3) * 100, 100);
+                document.getElementById('comboFill').style.width = fill + '%';
+                document.getElementById('comboCount').textContent = current;
+
+                if (current === 3) {
+                    this.showEmotion('🔥 Combo Bonus! 🔥');
+                }
+            }
+
+            showEmotion(text) {
+                const box = document.getElementById('emotionBox');
+                box.innerHTML = text;
+                box.style.display = 'block';
+                setTimeout(() => {
+                    box.style.display = 'none';
+                }, 2000);
+            }
+
+            fillSlot(index, letter) {
+                const slot = document.querySelector(`[data-index="${index}"]`);
+                if (slot) {
+                    slot.textContent = letter;
+                    slot.classList.add('filled');
+                }
+            }
+
+            highlightError(index) {
+                const slot = document.querySelector(`[data-index="${index}"]`);
+                if (slot) {
+                    slot.classList.add('error');
+                    const feedback = document.createElement('div');
+                    feedback.className = 'slot-feedback';
+                    feedback.textContent = '❌';
+                    slot.appendChild(feedback);
+                    setTimeout(() => feedback.remove(), 800);
+                }
+            }
+
+            highlightSuccess(index) {
+                const slot = document.querySelector(`[data-index="${index}"]`);
+                if (slot) {
+                    slot.classList.add('correct');
+                    const feedback = document.createElement('div');
+                    feedback.className = 'slot-feedback';
+                    feedback.textContent = '✅';
+                    slot.appendChild(feedback);
+                    setTimeout(() => feedback.remove(), 800);
+                }
+            }
+
+            disableLetterButton(letter) {
+                const btn = document.querySelector(`[data-letter="${letter}"]`);
+                if (btn) {
+                    btn.disabled = true;
+                    btn.classList.add('wrong');
+                }
+            }
+
+            showCompletion(score, stars, breakdown) {
+                this.showScreen('completionScreen');
+                document.getElementById('levelScore').textContent = score;
+                document.getElementById('starsDisplay').textContent = '⭐'.repeat(stars);
+                document.getElementById('baseScore').textContent = breakdown.base;
+                document.getElementById('timeBonus').textContent = breakdown.time;
+                document.getElementById('comboBonus').textContent = breakdown.combo;
+                document.getElementById('errorPenalty').textContent = breakdown.penalty;
+
+                const level = this.game.currentLevel;
+                const nextBtn = document.getElementById('nextBtn');
+                if (level.number >= 20) {
+                    nextBtn.textContent = '🎊 You\'re Legendary!';
+                } else {
+                    nextBtn.textContent = '➡️ Next Level';
+                }
+
+                // Confetti
+                this.createConfetti();
+            }
+
+            createConfetti() {
+                for (let i = 0; i < 50; i++) {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + '%';
+                    confetti.style.backgroundColor = ['#FF6B6B', '#4ECDC4', '#FFE66D', '#95E1D3'][
+                        Math.floor(Math.random() * 4)
+                    ];
+                    confetti.style.animation = `fall ${2 + Math.random() * 2}s linear forwards`;
+                    document.body.appendChild(confetti);
+
+                    setTimeout(() => confetti.remove(), 4000);
+                }
+            }
+
+            showLevelSelect() {
+                this.showScreen('levelSelectScreen');
+                const container = document.getElementById('levelSelectButtons');
+                container.innerHTML = '';
+
+                for (let i = 1; i <= 100; i++) {
+                    const btn = document.createElement('button');
+                    btn.className = 'level-btn';
+                    btn.textContent = i;
+
+                    if (this.game.state.completedLevels.has(i)) {
+                        btn.classList.add('completed');
+                    }
+
+                    const group = Math.ceil(i / 10);
+                    const isGroupUnlocked = this.isGroupUnlocked(group);
+
+                    if (isGroupUnlocked) {
+                        btn.onclick = () => this.game.loadLevel(i);
+                    } else {
+                        btn.disabled = true;
+                    }
+
+                    container.appendChild(btn);
+                }
+            }
+
+            isGroupUnlocked(group) {
+                if (group === 1) return true;
+                const prevGroupStart = (group - 1) * 10 - 9;
+                const prevGroupEnd = (group - 1) * 10;
+                for (let i = prevGroupStart; i <= prevGroupEnd; i++) {
+                    if (!this.game.state.completedLevels.has(i)) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+        }
+
+        // ============================================================
+        // MAIN GAME
+        // ============================================================
+
+        class Game {
+            constructor() {
+                this.state = new GameState();
+                this.soundManager = new SoundManager();
+                this.voiceManager = new VoiceManager();
+                this.levelManager = new LevelManager();
+                this.ui = new UIManager(this);
+                
+                this.currentLevel = null;
+                this.gameMode = 'story';
+                this.showWordIcons = true; // Always show by default
+                this.gameState = {
+                    currentSlotIndex: 0,
+                    filledSlots: new Set(),
+                    errors: 0,
+                    combo: 0,
+                    timeRemaining: 0,
+                    timerInterval: null,
+                    hints: 0,
+                    wrongLetters: new Set(),
+                    levelStartTime: 0,
+                    boss: {
+                        hp: 100,
+                        phase: 1,
+                        damage: 10
+                    }
+                };
+
+                this.setupEventListeners();
+                this.ui.showScreen('menuScreen');
+                
+                // Auto-activate word icons on start
+                document.getElementById('wordIconBtn').classList.add('active');
+            }
+
+            setupEventListeners() {
+                document.getElementById('voiceBtn').addEventListener('click', () => {
+                    this.voiceManager.enabled = !this.voiceManager.enabled;
+                    event.target.classList.toggle('active');
+                });
+
+                document.getElementById('wordIconBtn').addEventListener('click', () => {
+                    this.showWordIcons = !this.showWordIcons;
+                    event.target.classList.toggle('active');
+                    this.updateWordIconDisplay();
+                });
+
+                document.getElementById('highContrastBtn').addEventListener('click', () => {
+                    document.body.classList.toggle('high-contrast');
+                    event.target.classList.toggle('active');
+                });
+
+                document.getElementById('dyslexiaBtn').addEventListener('click', () => {
+                    document.body.classList.toggle('dyslexia-mode');
+                    event.target.classList.toggle('active');
+                });
+
+                document.getElementById('largeTextBtn').addEventListener('click', () => {
+                    document.body.style.fontSize = document.body.style.fontSize === '18px' ? '16px' : '18px';
+                    event.target.classList.toggle('active');
+                });
+            }
+
+            startGame(mode) {
+                this.gameMode = mode;
+                this.state.gameMode = mode;
+                this.state.save();
+                
+                if (mode === 'practice' || mode === 'timeattack') {
+                    this.ui.showLevelSelect();
+                } else {
+                    this.loadLevel(this.state.currentLevel);
+                }
+            }
+
+            loadLevel(levelNumber) {
+                this.state.currentLevel = levelNumber;
+                this.state.save();
+                this.ui.updateStats();
+
+                this.currentLevel = this.levelManager.getLevel(levelNumber);
+                
+                this.gameState = {
+                    currentSlotIndex: 0,
+                    filledSlots: new Set(),
+                    errors: 0,
+                    combo: 0,
+                    timeRemaining: this.currentLevel.timerSeconds,
+                    timerInterval: null,
+                    hints: 0,
+                    wrongLetters: new Set(),
+                    levelStartTime: Date.now(),
+                    boss: {
+                        hp: 100,
+                        phase: 1
+                    }
+                };
+
+                this.ui.setupLevelUI(this.currentLevel);
+                this.ui.createSlots(this.currentLevel.word);
+                this.ui.createLetterButtons(this.currentLevel.word);
+                this.ui.updateErrorCount(0, this.currentLevel.errorLimit);
+                this.ui.setActiveSlot(0);
+
+                // Always display word icon for all levels
+                this.updateWordIconDisplay();
+
+                if (this.currentLevel.features.includes('emoji-hint')) {
+                    this.displayHint(`The emoji is: ${this.currentLevel.emoji}`);
+                }
+
+                this.ui.showScreen('gameScreen');
+                this.startTimer();
+                this.soundManager.click();
+                this.voiceManager.speak(`Level ${levelNumber}: ${this.currentLevel.name}`);
+            }
+
+            startTimer() {
+                if (this.gameState.timerInterval) clearInterval(this.gameState.timerInterval);
+                
+                this.gameState.timerInterval = setInterval(() => {
+                    this.gameState.timeRemaining -= 0.1;
+                    this.ui.updateTimer(this.gameState.timeRemaining, this.currentLevel.timerSeconds);
+
+                    if (this.gameState.timeRemaining <= 0) {
+                        this.gameOver();
+                    }
+                }, 100);
+            }
+
+            selectLetter(letter) {
+                if (this.gameState.currentSlotIndex >= this.currentLevel.word.length) {
+                    return;
+                }
+
+                const slot = this.currentLevel.word[this.gameState.currentSlotIndex];
+                const btn = document.querySelector(`[data-letter="${letter}"]`);
+
+                if (!btn || btn.disabled) return;
+
+                this.soundManager.click();
+
+                if (letter === slot) {
+                    this.correctLetter();
+                } else {
+                    this.wrongLetter(letter);
+                }
+            }
+
+            correctLetter() {
+                const index = this.gameState.currentSlotIndex;
+                this.ui.fillSlot(index, this.currentLevel.word[index]);
+                this.ui.highlightSuccess(index);
+
+                this.gameState.filledSlots.add(index);
+                this.gameState.combo++;
+                this.gameState.currentSlotIndex++;
+
+                this.soundManager.correct();
+                this.ui.showEmotion('✅ Correct!');
+
+                // Praise
+                if (this.gameState.combo === this.currentLevel.word.length) {
+                    this.voiceManager.praise();
+                    this.ui.showEmotion('🎉 Perfect!');
+                } else if (index === this.currentLevel.word.length - 1) {
+                    this.ui.showEmotion('🎯 Last Letter!');
+                }
+
+                // Combo bonus
+                if (this.currentLevel.features.includes('combo')) {
+                    this.ui.updateCombo(this.gameState.combo % 4);
+                    if (this.gameState.combo % 3 === 0) {
+                        this.soundManager.combo();
+                        this.voiceManager.praise();
+                    }
+                }
+
+                // Boss damage
+                if (this.currentLevel.isBoss) {
+                    this.damageBoss(10);
+                }
+
+                this.ui.setActiveSlot(this.gameState.currentSlotIndex);
+
+                if (this.gameState.filledSlots.size === this.currentLevel.word.length) {
+                    this.completeLevel();
+                }
+            }
+
+            wrongLetter(letter) {
+                const index = this.gameState.currentSlotIndex;
+                
+                // Prevent same wrong letter
+                if (this.gameState.wrongLetters.has(letter)) {
+                    this.ui.showEmotion('🚫 Already tried!');
+                    return;
+                }
+
+                this.gameState.wrongLetters.add(letter);
+                this.gameState.errors++;
+                this.gameState.combo = 0;
+                this.gameState.timeRemaining = Math.max(0, this.gameState.timeRemaining - 3);
+
+                this.ui.highlightError(index);
+                this.ui.disableLetterButton(letter);
+                this.ui.updateErrorCount(this.gameState.errors, this.currentLevel.errorLimit);
+                this.ui.updateCombo(0);
+
+                this.soundManager.wrong();
+                this.ui.showEmotion('❌ Wrong!');
+
+                if (this.gameState.errors >= this.currentLevel.errorLimit) {
+                    this.gameOver();
+                }
+            }
+
+            useHint() {
+                if (this.currentLevel.noHints) {
+                    this.voiceManager.speak("No hints available for this level!");
+                    return;
+                }
+
+                this.gameState.hints++;
+                const index = this.gameState.currentSlotIndex;
+                const letter = this.currentLevel.word[index];
+
+                if (this.gameState.hints === 1) {
+                    this.displayHint(`First letter: ${letter.charAt(0)}`);
+                    this.voiceManager.hint(`The letter is ${letter}`);
+                } else if (this.gameState.hints === 2) {
+                    this.displayHint(`Position: Slot ${index + 1}`);
+                } else {
+                    this.displayHint(`It's the letter ${letter}`);
+                    this.voiceManager.hint(`The answer is ${letter}`);
+                }
+
+                this.soundManager.click();
+            }
+
+            displayHint(text) {
+                const display = document.getElementById('hintDisplay');
+                display.textContent = text;
+                display.style.display = 'block';
+            }
+
+            skipLevel() {
+                if (confirm('Skip this level? You won\'t get rewards.')) {
+                    this.nextLevel();
+                }
+            }
+
+            damageBoss(damage) {
+                if (!this.currentLevel.isBoss) return;
+                
+                this.gameState.boss.hp = Math.max(0, this.gameState.boss.hp - damage);
+                const hpPercent = (this.gameState.boss.hp / 100) * 100;
+                document.getElementById('hpFill').style.width = hpPercent + '%';
+                document.getElementById('hpText').textContent = this.gameState.boss.hp;
+
+                if (this.gameState.boss.hp === 0) {
+                    this.ui.showEmotion('👹 Boss Defeated! 🎉');
+                    this.completeLevel();
+                }
+            }
+
+            completeLevel() {
+                clearInterval(this.gameState.timerInterval);
+
+                const timeUsed = (Date.now() - this.gameState.levelStartTime) / 1000;
+                const timeBonus = Math.max(0, (this.currentLevel.timerSeconds - timeUsed) * 10);
+                const baseScore = 300 + (this.currentLevel.word.length * 50);
+                const comboBonus = this.gameState.combo > 0 ? this.gameState.combo * 25 : 0;
+                const errorPenalty = this.gameState.errors * 10;
+                const totalScore = Math.max(100, baseScore + Math.floor(timeBonus) + comboBonus - errorPenalty);
+
+                const stars = this.calculateStars(timeUsed, this.gameState.errors);
+
+                this.state.score += totalScore;
+                this.state.totalStars += stars;
+                this.state.totalCoins += (stars * 10);
+                this.state.completedLevels.add(this.currentLevel.number);
+                
+                if (this.currentLevel.number === this.state.currentLevel) {
+                    this.state.currentLevel = Math.min(20, this.currentLevel.number + 1);
+                }
+
+                this.state.save();
+                this.soundManager.levelUp();
+                this.voiceManager.praise();
+
+                this.ui.updateStats();
+                this.ui.showCompletion(totalScore, stars, {
+                    base: baseScore,
+                    time: Math.floor(timeBonus),
+                    combo: comboBonus,
+                    penalty: -errorPenalty
+                });
+            }
+
+            calculateStars(timeUsed, errors) {
+                let stars = 3;
+                if (errors > 2) stars = 2;
+                if (errors > 5) stars = 1;
+                if (timeUsed > this.currentLevel.timerSeconds * 0.7) stars = Math.max(1, stars - 1);
+                return stars;
+            }
+
+            gameOver() {
+                clearInterval(this.gameState.timerInterval);
+                this.ui.showEmotion('⏰ Time Up!');
+                this.voiceManager.speak("Game Over! Try again!");
+                this.soundManager.wrong();
+                
+                setTimeout(() => {
+                    this.loadLevel(this.currentLevel.number);
+                }, 2000);
+            }
+
+            nextLevel() {
+                const nextNumber = this.currentLevel.number + 1;
+                if (nextNumber <= 100) {
+                    this.loadLevel(nextNumber);
+                } else {
+                    this.showMenu();
+                }
+            }
+
+            showMenu() {
+                clearInterval(this.gameState.timerInterval);
+                this.ui.showScreen('menuScreen');
+            }
+
+            showLevelSelect() {
+                this.ui.showLevelSelect();
+            }
+
+            resetProgress() {
+                if (confirm('Reset all progress? This cannot be undone!')) {
+                    this.state.reset();
+                    this.ui.updateStats();
+                    this.loadLevel(1);
+                }
+            }
+
+            updateWordIconDisplay() {
+                const iconDisplay = document.getElementById('wordIconDisplay');
+                if (!iconDisplay) return;
+                
+                if (this.showWordIcons && this.currentLevel) {
+                    iconDisplay.textContent = this.currentLevel.emoji;
+                    iconDisplay.style.display = 'flex';
+                } else {
+                    iconDisplay.style.display = 'none';
+                }
+            }
+        }
+
+        // ============================================================
+        // INITIALIZE GAME
+        // ============================================================
+
+        const game = new Game();
+
+        // Keyboard support
+        document.addEventListener('keydown', (e) => {
+            const letter = e.key.toUpperCase();
+            if (/^[A-Z]$/.test(letter)) {
+                game.selectLetter(letter);
+            }
+        });
+
+        // Add confetti animation to styles
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fall {
+                to {
+                    transform: translateY(100vh) rotate(360deg);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
